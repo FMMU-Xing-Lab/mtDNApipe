@@ -55,7 +55,11 @@ Raw FASTQ -> Quality Filtering (Custom Script) -> Adapter/Quality Trimming (fast
     编译成功后，会在 `scripts/overlap_corrector/` 目录下生成一个名为 `overlap_corrector` 的可执行文件。
 
 4.  **准备参考文件**
-    -   将你的线粒体参考基因组 `hg19_mt.fa`（或类似文件）放置在一个方便访问的位置。
+    -   为参考基因组创建index
+    ```bash
+    cd ref/
+    bwa index hg19_mt.fa
+    ```
     -   检查 `ref/chrM_refAllele.txt` 文件是否存在。
 
 至此，安装完成！
