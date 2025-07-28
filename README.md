@@ -25,7 +25,7 @@ Raw FASTQ -> Quality Filtering (Custom Script) -> Adapter/Quality Trimming (fast
 -   A C++ compiler (e.g., g++)
 
 ### 参考基因组
-你需要一个线粒体的参考基因组序列（FASTA格式）。例如，可以从UCSC Genome Browser下载 `hg19` 的 `chrM.fa`。**请勿将大型参考基因组文件上传或提交到版本库中。**
+
 
 ## 2. 安装 (Installation)
 
