@@ -1,6 +1,6 @@
 # mtDNApipe
 
-MitoVariantPipe 是一个用于从二代测序（NGS）数据中检测线粒体DNA（mtDNA）低频异质性（low-frequency heteroplasmy）的生物信息学分析流程。
+mtDNApipe 是一个用于从二代测序（NGS）数据中检测线粒体DNA（mtDNA）低频异质性（low-frequency heteroplasmy）的生物信息学分析流程。
 
 该流程整合了质量控制、序列比对、Indel重比对以及一套定制的脚本，用于处理测序错误、PCR扩增偏好，并最终实现对低至0.1%频率的突变进行高精度检测。
 
