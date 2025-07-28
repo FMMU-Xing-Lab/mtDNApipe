@@ -33,15 +33,15 @@ Raw FASTQ -> Quality Filtering (Custom Script) -> Adapter/Quality Trimming (fast
 
 1.  **克隆仓库**
     ```bash
-    git clone https://github.com/your-username/MitoVariantPipe.git
-    cd MitoVariantPipe
+    git clone https://github.com/FMMU-Xing-Lab/mtDNApipe.git
+    cd mtDNApipe
     ```
 
 2.  **创建并激活 Conda 环境**
     使用项目提供的 `environment.yml` 文件来自动安装所有软件依赖。
     ```bash
     conda env create -f environment.yml
-    conda activate mitovariantpipe
+    conda activate mtDNApipe
     ```
     这个过程可能需要几分钟。激活环境后，所有需要的工具（如 `bwa`, `fastp`）都将在你的 `PATH` 中。
 
@@ -90,11 +90,9 @@ bash run_pipeline.sh -i <sample_id> \
 为了验证安装是否成功，你可以运行 `example/` 目录下的测试数据。
 ```bash
 # 确保你已经激活了 conda 环境
-# conda activate mitovariantpipe
-
+# conda activate mtDNApipe
 # 运行测试脚本
-# 注意：你需要将 /path/to/your/hg19_mt.fa 替换为真实路径
-bash example/run_test.sh /path/to/your/hg19_mt.fa
+bash example/run_test.sh
 ```
 `run_test.sh` 的内容如下：
 ```bash
