@@ -117,4 +117,4 @@ Open an [Issue](https://github.com/FMMU-Xing-Lab/mtDNApipe/issues) to report a b
     
 
 ## License
-This project is licensed under the [MIT License](.
+This project is licensed under the [MIT License](https://github.com/FMMU-Xing-Lab/mtDNApipe/blob/main/LICENSE).
