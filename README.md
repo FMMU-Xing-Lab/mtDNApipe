@@ -1,137 +1,120 @@
 # mtDNApipe
+**A robust pipeline for ultra-sensitive detection of low-frequency mitochondrial DNA variants from paired-end NGS data.**
 
-mtDNApipe 是一个用于从二代测序（NGS）数据中检测线粒体DNA（mtDNA）低频异质性（low-frequency heteroplasmy）的生物信息学分析流程。
+---
 
-该流程整合了质量控制、序列比对、Indel重比对以及一套定制的脚本，用于处理测序错误、PCR扩增偏好，并最终实现对低至0.1%频率的突变进行高精度检测。
+## Overview
 
-## 流程概览
+`mtDNApipe` is a comprehensive bioinformatics pipeline designed for the high-fidelity detection of mitochondrial DNA (mtDNA) heteroplasmy from Next-Generation Sequencing (NGS) data. The workflow starts with raw paired-end FASTQ files and implements a series of rigorous steps to identify low-frequency variants with high confidence.
 
-```
-Raw FASTQ -> Quality Filtering (Custom Script) -> Adapter/Quality Trimming (fastp) -> Overlap Correction (Custom C++) -> Alignment (BWA) -> BAM Processing (Picard & GATK) -> mtDNA Read Extraction -> Custom Deduplication -> Variant Calling
-```
+Key features of the pipeline include:
+- **Stringent Quality Control**: A custom sliding-window filter followed by `fastp` for robust read trimming.
+- **Advanced Error Correction**: A custom C++ tool to correct sequencing errors in overlapping read pairs.
+- **Best-Practice Alignment**: Standard BWA-MEM alignment followed by GATK 3.8 Indel Realignment to minimize alignment artifacts.
+- **Custom Deduplication**: A sophisticated consensus-based deduplication strategy (`con_rmdup_v1.5.py`) that significantly outperforms standard methods for deep sequencing data.
+- **Rigorous Variant Calling**: A final calling script that filters for terminal base-pair artifacts, oxidative damage signatures, and known problematic repeat regions in the mitochondrial genome.
 
-## 1. 先决条件 (Prerequisites)
+---
 
-### 软件依赖
-本流程依赖于一系列标准的生物信息学工具。我们强烈建议使用 `Conda` 来管理这些依赖。
+## Installation
 
--   Python (>= 3.7)
--   BWA (0.7.17)
--   Fastp
--   Samtools
--   Picard
--   GATK (3.8) - **注意**: 本流程使用 GATK 3.x 版本的语法。
--   Perl
--   A C++ compiler (e.g., g++)
+We strongly recommend using `Conda` to manage all software and package dependencies.
 
-### 参考基因组
-
-
-## 2. 安装 (Installation)
-
-我们推荐使用 Conda 来创建独立的运行环境，这可以避免与系统其他软件的冲突。
-
-1.  **克隆仓库**
-    ```bash
-    git clone https://github.com/FMMU-Xing-Lab/mtDNApipe.git
-    cd mtDNApipe
-    ```
-
-2.  **创建并激活 Conda 环境**
-    使用项目提供的 `environment.yml` 文件来自动安装所有软件依赖。
-    ```bash
-    conda env create -f environment.yml
-    conda activate mtDNApipe
-    ```
-    这个过程可能需要几分钟。激活环境后，所有需要的工具（如 `bwa`, `fastp`）都将在你的 `PATH` 中。
-
-3.  **编译 C++ 脚本**
-    本流程包含一个用于校正 Read Overlap 的 C++ 脚本，需要手动编译。
-    ```bash
-    cd scripts/overlap_corrector/
-    make
-    cd ../../ # 返回项目根目录
-    ```
-    编译成功后，会在 `scripts/overlap_corrector/` 目录下生成一个名为 `overlap_corrector` 的可执行文件。
-
-4.  **准备参考文件**
-    -   为参考基因组创建index
-    ```bash
-    cd ref/
-    bwa index hg19_mt.fa
-    ```
-    -   检查 `ref/chrM_refAllele.txt` 文件是否存在。
-
-至此，安装完成！
-
-## 3. 使用方法 (Usage)
-
-所有分析步骤都已封装在 `run_pipeline.sh` 脚本中。
-
-### 命令格式
+### Step 1: Clone the Repository
 ```bash
-bash run_pipeline.sh -i <sample_id> \
-                     -1 <path/to/read1.fq.gz> \
-                     -2 <path/to/read2.fq.gz> \
-                     -r <path/to/ref_genome.fa> \
-                     -o <path/to/output_directory>
+git clone https://github.com/FMMU-Xing-Lab/mtDNApipe.git
+cd mtDNApipe
 ```
 
-### 参数说明
--   `-i` : **[必需]** 样本ID，例如 `Sample01`。
--   `-1` : **[必需]** Read 1 的 FASTQ 文件路径 (`.fq.gz`)。
--   `-2` : **[必需]** Read 2 的 FASTQ 文件路径 (`.fq.gz`)。
--   `-r` : **[必需]** 线粒体参考基因组的 FASTA 文件路径。
--   `-o` : **[必需]** 输出目录的路径。所有结果将保存在 `<output_directory>/<sample_id>/` 下。
--   `-t` : **[可选]** BWA比对时使用的线程数 (默认为 8)。
--   `-h` : 显示帮助信息。
+### Step 2: Create and Activate the Conda Environment
 
-### 运行测试示例
-为了验证安装是否成功，你可以运行 `example/` 目录下的测试数据。
+This single command will install all required tools (BWA, fastp, GATK 3.8, etc.) and Python packages (pysam, pandas, tqdm).
+
 ```bash
-# 确保你已经激活了 conda 环境
+conda env create -f environment.yml
+conda activate mtDNApipe
+ ```
+    
+    
+
+### Step 3: Compile C++ Helper Tool
+The pipeline uses a custom C++ tool for correcting read overlaps. Compile it using the provided Makefile.
+```bash
+cd scripts/overlap_corrector/
+make
+```
+
+
+### Step 4:  Prepare Reference Genome
+You will need a mitochondrial reference genome in FASTA format. You can download one from resources like UCSC or Ensembl. ***You must index it for BWA and Samtools before the first run.***
+```bash
+# This is a one-time setup for your reference genome
+bwa index /path/to/your/hg19_mt.fa
+samtools faidx /path/to/your/hg19_mt.fa
+# You will also need to create a dictionary file for GATK
+java -jar $(which picard.jar) CreateSequenceDictionary R=/path/to/your/hg19_mt.fa O=/path/to/your/hg19_mt.dict
+```
+   
+
+## 3. Usage
+
+The entire workflow is orchestrated by the `run_pipeline.sh` script.
+
+### Command
+```bash
+bash run_pipeline.sh \
+  -i <sample_id> \
+  -1 <path/to/read1.fq.gz> \
+  -2 <path/to/read2.fq.gz> \
+  -r <path/to/hg19_mt.fa> \
+  -o <path/to/output_dir> \
+  -t <threads>
+```
+
+### Arguments
+| Flag | Description | Required | Default |
+| ----- | ----- | ----- | ----- |
+| `-i` | Sample identifier (e.g., `Sample01`) | Yes | - |
+| `-1` | Path to Read 1 FASTQ file (`.fq.gz`)| Yes | - |
+| `-2` | Path to Read 2 FASTQ file (`.fq.gz`) | Yes | - |
+| `-r` | Path to the mitochondrial reference genome FASTA file.	 | Yes | - |
+| `-o` | Path to the main output directory. | Yes | - |
+| `-t` | Number of threads to use for BWA alignment. | No | 8 |
+| `-h` | Display the help message. | No | - |
+
+## 4. Input and Output
+
+### Input Files
+
+Paired-end FASTQ files: Gzipped (`_R1.fq.gz`, `_R2.fq.gz`).
+Reference Genome: A FASTA file containing the mitochondrial sequence (`hg19_mt.fa`), pre-indexed.
+
+### Output Directory Structure
+All results for a given sample will be organized in a dedicated sub-directory: `<output_dir>/<sample_id>/.`
+
+### Key Output Files
+| Flag | Description |
+| ----- | ----- |
+| `SAMPLE_ID.conrmdup.v5.end10.mutations.txt` | **Final high-confidence mutation list.** A tab-separated file with position, ref, alt, VAF, and depth. |
+| `SAMPLE_ID.mt.no.softclip.bam` | The final processed, consensus-deduplicated BAM file used for variant calling. Ready for IGV inspection. |
+| `SAMPLE_ID_analysis.log` | A comprehensive log file detailing every step of the pipeline execution. Essential for troubleshooting. |
+| `SAMPLE_ID_fastp.html` | An interactive quality report from `fastp`. |
+
+## Example
+To ensure your installation is working correctly, run the provided test case. It uses a small subset of reads to execute the full pipeline.
+```bash
+# Make sure you have activated the conda environment
 # conda activate mtDNApipe
-# 运行测试脚本
-bash example/run_test.sh
+
+# Run the test script. You must provide the path to your reference genome.
+bash example/run_test.sh /path/to/your/hg19_mt.fa
 ```
-`run_test.sh` 的内容如下：
-```bash
-#!/bin/bash
-# A script to test the pipeline with example data.
-# Usage: bash run_test.sh <path_to_your_reference_genome>
+The test should complete in a few minutes and generate an output directory named `test_output/`. You can inspect the final mutation file at `test_output/test_sample/test_sample.conrmdup.v5.end10.mutations.txt`.
 
-REF_GENOME=$1
-if [ -z "$REF_GENOME" ]; then
-    echo "Error: Please provide the path to your reference genome."
-    exit 1
-fi
+## Contributing & Issues
+We welcome bug reports, feature requests, and pull requests. Please feel free to:
+Open an [Issue](https://github.com/FMMU-Xing-Lab/mtDNApipe/issues) to report a bug or suggest a feature.
+    
 
-bash ../run_pipeline.sh -i test_sample \
-                        -1 test_R1.fq.gz \
-                        -2 test_R2.fq.gz \
-                        -r $REF_GENOME \
-                        -o ../test_output
-```
-
-## 4. 输入与输出文件
-
-### 输入文件
-1.  **双端测序数据**: `_R1.fq.gz` 和 `_R2.fq.gz`。
-2.  **线粒体参考基因组**: FASTA 格式。
-
-### 主要输出文件
-所有输出文件均位于 `<output_dir>/<sample_id>/` 目录下。
-
--   `*_analysis.log`: 整个流程的运行日志。
--   `*.realn.bam`: GATK Indel 重比对后的最终 BAM 文件。
--   `*.mt.no.softclip.bam`: 移除了软剪切（soft-clipped）reads 的线粒体 BAM 文件，用于下游分析。
--   `*.conrmdup.v5.end10.txt`: **最终的突变结果文件**。这是一个文本文件，包含了检测到的低频突变位点、参考碱基、突变碱基、频率、覆盖深度等信息。
--   其他中间文件：流程会生成大量中间文件（如 `.raw.bam`, `.sort.picard.bam` 等），用于调试和追溯。
-
-## 5. 持续更新与贡献
-本流程目前处于持续开发和优化阶段。我们欢迎任何形式的反馈、问题报告或功能建议。
-
-如果您在使用中遇到问题，或者有改进建议，请在 GitHub 仓库中提交一个 [Issue](https://github.com/your-username/MitoVariantPipe/issues)。
-
-## 6. 许可证 (License)
-本项目采用 [MIT License](./LICENSE)。
+## License
+This project is licensed under the [MIT License](.
