@@ -3,7 +3,7 @@
 
 ---
 
-## Overview
+## 1.Overview
 
 `mtDNApipe` is a comprehensive bioinformatics pipeline designed for the high-fidelity detection of mitochondrial DNA (mtDNA) heteroplasmy from Next-Generation Sequencing (NGS) data. The workflow starts with raw paired-end FASTQ files and implements a series of rigorous steps to identify low-frequency variants with high confidence.
 
@@ -16,7 +16,7 @@ Key features of the pipeline include:
 
 ---
 
-## Installation
+## 2.Installation
 
 We strongly recommend using `Conda` to manage all software and package dependencies.
 
@@ -100,7 +100,7 @@ All results for a given sample will be organized in a dedicated sub-directory: `
 | `SAMPLE_ID_analysis.log` | A comprehensive log file detailing every step of the pipeline execution. Essential for troubleshooting. |
 | `SAMPLE_ID_fastp.html` | An interactive quality report from `fastp`. |
 
-## Example
+## 5.Example
 To ensure your installation is working correctly, run the provided test case. It uses a small subset of reads to execute the full pipeline.
 ```bash
 # Make sure you have activated the conda environment
@@ -111,10 +111,10 @@ bash example/run_test.sh /path/to/your/hg19_mt.fa
 ```
 The test should complete in a few minutes and generate an output directory named `test_output/`. You can inspect the final mutation file at `test_output/test_sample/test_sample.conrmdup.v5.end10.mutations.txt`.
 
-## Contributing & Issues
+## 6.Contributing & Issues
 We welcome bug reports, feature requests, and pull requests. Please feel free to:
 Open an [Issue](https://github.com/FMMU-Xing-Lab/mtDNApipe/issues) to report a bug or suggest a feature.
     
 
-## License
+## 7.License
 This project is licensed under the [MIT License](https://github.com/FMMU-Xing-Lab/mtDNApipe/blob/main/LICENSE).
