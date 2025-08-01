@@ -1,0 +1,18 @@
+# environment.yml
+name: mtDNApipe
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.8
+  - bwa=0.7.17
+  - fastp=0.23.2
+  - samtools=1.15
+  - picard=2.26.10  # Picard 的 conda 安装可能与 GATK 有版本冲突，需注意
+  - gatk=3.8        # 你的命令是 GATK3.x 语法，所以指定版本 3.8
+  - perl
+# Python packages
+  - pysam # for To_softclip_bam.py
+  - pandas # for data handling in various scripts
+  - tqdm   # for progress bars
