@@ -54,7 +54,7 @@ samtools faidx /path/to/your/hg19_mt.fa
 # You will also need to create a dictionary file for GATK
 java -jar $(which picard.jar) CreateSequenceDictionary R=/path/to/your/hg19_mt.fa O=/path/to/your/hg19_mt.dict
 ```
-   
+   The reference genome FASTA file can be downloaded according to your own requirements (e.g., hg19 or hg38) and placed in the ref folder. We recommend editing the mitochondrial reference genome (chrM) by appending positions 1-550 to the end of the chrM reference genome, forming a chrM reference genome of length 1-17119. In the mutation calling stage, the script workflow will automatically merge the mutation information from positions 16570-17119 with positions 1-550.
 
 ## 3. Usage
 
@@ -99,6 +99,8 @@ All results for a given sample will be organized in a dedicated sub-directory: `
 | `SAMPLE_ID.mt.no.softclip.bam` | The final processed, consensus-deduplicated BAM file used for variant calling. Ready for IGV inspection. |
 | `SAMPLE_ID_analysis.log` | A comprehensive log file detailing every step of the pipeline execution. Essential for troubleshooting. |
 | `SAMPLE_ID_fastp.html` | An interactive quality report from `fastp`. |
+
+If the script is interrupted during execution, you can directly rerun run_pipeline.sh, which will automatically skip the completed steps. If you want to go back and rerun a specific step, navigate to the status_flags folder in the results directory and delete the success flag file for the corresponding step.
 
 ## 5.Example
 To ensure your installation is working correctly, run the provided test case. It uses a small subset of reads to execute the full pipeline.
